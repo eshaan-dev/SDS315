@@ -13,22 +13,30 @@ library(ggplot2)
 library(tidyverse)
 ```
 
+Link to github:                (https://github.com/eshaan-dev/SDS315/tree/Homework-2) 
+
+
+
 ## Part 1
 
 ```{r}
 data <- read.csv('profs.csv')
-ggplot(data) + geom_histogram(color ="black", aes(x = eval)) + labs(x = "Course evaluation scores", y = "How many students contributed", title = "Distribution of Course Evaluation Scores")
+ggplot(data) + geom_histogram(color ="black", aes(x = eval)) + labs(x = "Course evaluation scores", y = "How many students contributed", title = "Distribution of Course Evaluation Scores", caption = "")
 ```
+This graph contains the course evaluation scores compared to how many students contributed to it. There is a right skewed curve with a peak around the value of 4. There is a visable correlation between lower scores and how many students contributed towards the evaluation. \newpage
+
 ```{r}
 ggplot(data) + geom_boxplot(aes(x = native, y = eval)) + labs(x = "If teacher is native in speaking English", y = "Course evaluation score", title = "Impact of Native English Speaking Teachers on Course Evaluation Scores")
 ```
+This graph shows the course evaluation score based on if the teacher is native in speaking english. If a teacher speaks native English, there is on average a higher course evaluation score (4 compared to ~3.6). However, there is also many outliers and the native english speaking teachers also contribute to the lowest course evaluation score. \newline
 ```{r}
 ggplot(data) + geom_histogram(color ="black",aes(y =eval)) + labs(x = "Number of Students who filled out the course evaluation", y = "Course Evaluation Score", title = "Impact of Course Evaluation Score based on Gender") + facet_wrap(~gender)
 ```
+In totality, there are on average more students who completed a course evaluation for male than female teachers. Furthermore, there is a higher range of data for male teacher which contain the lower and upper extremes of the data. For the female teachers, there is a peak around 3.75 to 4 while the male teachers had a peak a bit higher where the score is around 4 and 4.3. \newline
 ```{r}
 ggplot(data) + geom_point(aes(x = beauty, y = eval)) + labs(x = "Subjective beauty rating", y= "Course evaluation score", title = "Impact of beauty on course evaluation score")
 ```
-
+The scatterplot above shows the association between the subjective beauty rating and its impact on the course evaluation score. At first, it looks like there is no reason to plot such a thing. However, there is a correlation coefficient `r round(cor(data$beauty, data$eval), 3)` which shows that there is a low correlation and therefore, it is highly unlikely that there is a correlation between the beauty rating and course evaluation score. They are independent of each other. \newline
 
 ## Part 2
 
@@ -38,17 +46,27 @@ bike <- read.csv("bikeshare.csv")
 bike |> group_by(hr) |> summarise(avg_total = mean(total)) |> ggplot() + geom_line(aes(x = hr, y = avg_total)) + labs(title = "Average Hourly Bike Rentals", x = "Hour of the Day", y = "Average Bike Rentals")
 
 ```
+The data shows the average bike rentals based on the hours of the day. There are clear peaks and declines in data and the peaks include 8 and 5 pm. This is an important trend as many people often commute during this time. It is possible that due to the distance from their houses or ease of access that many rent bikes before and after their shifts to commute back and front from work. \newline
 
 ```{r}
 bike |> 
-  group_by(hr, workingday) |> summarise(avg_total = mean(total)) |> ggplot() + geom_line(aes(x = hr, y = avg_total)) + 
+  group_by(hr, workingday) |> summarise(avg_total = mean(total), .groups = "drop") |> ggplot() + geom_line(aes(x = hr, y = avg_total)) + 
   labs(title = "Average Hourly Bike Rentals", x = "Hour of the Day", y = "Average Bike Rentals") + facet_wrap(~workingday)
 ```
+Since there was a speculation that there is a correlation due to the fact that people commute to work via biking, there is a faceted graph that graphs the frequency of bike rentals to if (0) it is not a working day and (1) it is a working day. Low and behold, there is a clear peak during the working days which reinforces the claim that there is a large group of people who rent bikes to ride to work. However, whats interesting is the peak of non-working day rentals is around 1pm. This would make sense as many people would like to ride around the city when it is lively which is around the early to late afternoon. As expected, there is a sharp dip right after. \newline
+
 
 
 ```{r}
 bike |> filter(hr == 9) |> group_by(weathersit, workingday) |> ggplot() + geom_bar(aes(x = weathersit)) + facet_wrap(~workingday) + labs(x = "weather situation code", y = "Frequency of Bike-sharing rentals", title = "Frequency of Bike-sharing rentals based on weather situation code")
 ```
+The weather situation code (the x-axis) is as follows:
+– 1: Clear, Few clouds, Partly cloudy, Partly cloudy
+– 2: Mist + Cloudy, Mist + Broken clouds, Mist + Few clouds, Mist
+– 3: Light Snow, Light Rain + Thunderstorm + Scattered clouds, Light Rain + Scattered clouds
+– 4: Heavy Rain + Ice Pallets + Thunderstorm + Mist, Snow + Fog
+
+It would make sense that there are no values in 4 as it is the most un-optimal biking condition which can cause risk to the rider. It would also make sense that 3 in both cases (0 = not working day) and (1 = working day) is at a much lower frequency for the same reason. For non working days, to get the most out of the rental, it is reasonable to rent out the bikes in near perfect weather conditions. The same case is reflected in the working day, but due to there being an objective of getting to work, there is a lesser gap between clear skies and misty + cloudy skies as they are manageable conditions to get to work. \newline
 
 ## Part 3
 ```{r}
@@ -63,11 +81,18 @@ levels=c("Sep", "Oct","Nov")))
 ```
 
 ```{r}
-capmetro_UT |> group_by(hour_of_day, month, day_of_week) |> summarise(avgBoard = mean(boarding)) |> ggplot() + geom_line(aes(x = hour_of_day, y = avgBoard, color = month)) + facet_wrap(~day_of_week) + labs(x = "Hour of the day", y = "Average boardings", title = "Average boardings based on the hour of day over different months")
+capmetro_UT |> group_by(hour_of_day, month, day_of_week) |> summarise(avgBoard = mean(boarding), .groups = "drop") |> ggplot() + geom_line(aes(x = hour_of_day, y = avgBoard, color = month)) + facet_wrap(~day_of_week) + labs(x = "Hour of the day", y = "Average boardings", title = "Average boardings based on the hour of day over different months")
 ```
+It is clear from looking at the days, there are less people who are taking the metro on Saturday and Sunday. This would make sense as many students use the metro to go from apartments to on campus for classes. Across the weekdays, there is an average of around 3 to 5 pm where the ride count goes up. In general, there doesn't seem to be a change in hours on a day to day basis. Saturday and Sunday also seem vastly similar. 
+
+There are certain events that can contribute towards the growth and lowered boardings. Around the time of September, an article was released (https://thedailytexan.com/2018/09/14/students-face-overcrowding-on-buses-following-capmetro-remap/) that stated there are reroutes that are happening and therefore can impact the bus rides. This can lead to things like overcrowding and whatnot. After the situation was mitigated (around November) which can show smoother curves (more balanced timings around the smaller interval which show more buses being added and therefore less crowding)
+
+Wednesday, Thursday and Friday in November look lower due to there being Thanksgiving weekend as well as a following week where schools were closed. This would result in a drop in the average ridership.
+
 ```{r}
-capmetro_UT |> ggplot() + geom_point(aes(x = boarding, y= temperature, color = weekend)) + facet_wrap(~hour_of_day)
+capmetro_UT |> ggplot() + geom_point(aes(x = boarding, y= temperature, color = weekend)) + facet_wrap(~hour_of_day) + labs(x = "Temprature", y= "Frequency of boarding", title = "Frequency of boarding with respect to temprature and if weekend or weekday")
 ```
+In general there is a trend where the peak time for the metro being used is around 3-5 pm. It is also observed for almost all plots that there is a correlation between higher temperature and higher boarding rates. This would make sense as walking would seem more unfeasible for higher temperatures and Texas is quite unforgiving with how high temperatures can get. \newline
 
 ## Part 4
 
@@ -77,14 +102,16 @@ top_songs <- billboard |> group_by(performer, song) |> summarise(count = n(), .g
 slice_head(n = 10)
 knitr::kable(top_songs)
 ```
+The table above shows songs over the decades who managed to stay in the top 100 for the longest. The table consists of the performer or the artist, the name of the song, and the number of weeks the song was on the top 100 list for. The table only has the top 10 entries of the list for longest. \newline
 
 ```{r}
 billboard |> filter(year!=1958, year!=2021) |> group_by(year) |> summarise(count = n_distinct(song), .groups = "drop") |> ggplot() + geom_line(aes(x = year, y = count)) + labs(x = "Year of song Release", y = "Number of Unique songs", title = "Number of unique songs over the years")
 ```
+There is a comeback which is demonstrated by the graph. It seems that there was a massive peak in the number of hit unique songs produced over the years around the late 1960s. However, there was a sharp decline with a staggering low in the early 2000s. However, there is a general incline in musical diversity which is still climbing. This would show a comeback in musical diversity in the recent years.  
 
 ```{r}
 billboard |> group_by(performer) |> filter(weeks_on_chart >= 10) |> summarise(counts = n_distinct(song), .groups = "drop") |> 
 filter(counts >= 30) |> ggplot(aes(x = fct_reorder(performer, counts), y = counts)) + geom_bar(stat = "identity") + labs(x = "Artist", y = "Number of 10-week-hits produced", title = "Number of 10-week-hits artists top produced") + coord_flip() 
 ```
-## NEED CAPTIONS FOR PLOTS GENERATED
-- key takeaways and and features 
+The following figure contains the artists who have the higher number of long lasting hits (the criteria to qualify was to stay in the top 100 charts for 10 or more weeks). The artists listed in the figure all have more than 30 such songs that are long lasting hits with the high being Elton John with a staggering 50+ songs. 
+
