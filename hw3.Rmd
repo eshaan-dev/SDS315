@@ -1,0 +1,235 @@
+---
+title: "Hw3"
+author: "Eshaan Singh"
+date: "2025-02-13"
+output: pdf_document
+---
+
+```{r setup, include=FALSE, }
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(ggplot2)
+library(tidyverse)
+library(mosaic)
+```
+
+Link to github: https://github.com/eshaan-dev/SDS315/tree/Homework-3 \newline
+
+## Problem 1
+
+
+
+### Part a)
+```{r}
+
+gas_price <- read.csv('gasprices.csv')
+gas_sample <- sample(gas_price, size=101)
+gas_price_bootstrap <- do(10000)*diffmean(Price ~Competitors,data=resample(gas_sample))
+ggplot(gas_price_bootstrap, aes(x = diffmean)) + geom_histogram(fill = "blue", color = "black", bins = 50) + labs(title = "Bootstrap of Mean Price Difference by Competitors", x = "Mean Price Difference", y = "Frequency") 
+
+avg_price <- mean(gas_price_bootstrap$diffmean)
+lower_ci <- mean(gas_price_bootstrap$diffmean) - 2 * sd(gas_price_bootstrap$diffmean)
+
+upper_ci <- mean(gas_price_bootstrap$diffmean) + 2 * sd(gas_price_bootstrap$diffmean)
+
+
+```
+
+Claim: There will be a higher charge asserted when there is little to no competition nearby. 
+
+Evidence & Conclusion: According to the bootstrap test, there is a mean of `r round(avg_price,3)`. In the context of the problem, it would mean that there is, on average, a reduction of price and therefore would signify that there is no increase in price when there is little to no competition nearby. Furthermore, with 95% confidence, the values lie between `r round(lower_ci,3)` and `r round(upper_ci,3)` meaning a reduction by 5.6 cents and increase by 0.009 cents.
+
+
+### Part b)
+```{r}
+
+area_price_bootstrap <- do(10000)*cor(Price ~Income,data=resample(gas_sample))
+
+ggplot(area_price_bootstrap, aes(x = cor)) + geom_histogram(fill = "chartreuse4", color = "black") + labs(x = "Correlation", y = "Frequency", title = "Bootstrap of Correlation between Gas Price and Income")
+
+```
+Claim: there will be a strong correlation between the price of Gas and Income. This would mean that higher income neighborhoods have a higher gas price on average.
+
+Evidence & Conclusion: According to the bootstrap graph, there is a high correlation with the mean being `r round(mean(area_price_bootstrap$cor),3)`. In fact, the 95% confidence interval lies between `r round(mean(area_price_bootstrap$cor) - 2 * sd(area_price_bootstrap$cor),3)` and `r round(mean(area_price_bootstrap$cor) + 2 * sd(area_price_bootstrap$cor),3)`. This further supports that on average, there will be a higher price for a higher income area. 
+
+### Part c)
+```{r}
+gas_stop_bootstrap <- do(10000)*diffmean(Price ~Stoplight,data=resample(gas_sample))
+
+ggplot(gas_stop_bootstrap, aes(x = diffmean)) + geom_histogram(fill = "chocolate4", color = "black") + labs(x = "Difference in means", y = "Frequency", title = "Bootstrap of Mean Price when located near Stoplights")
+```
+Claim: There will be a higher correlation between being near a stoplight and the price. This would mean that gas stations near stoplights will charge a higher price.
+
+
+Evidence & Conclusion: By looking at the graph it looks like an even distribution centered slightly off zero towards a mean of around `r round(mean(gas_stop_bootstrap$diffmean),3)`. This would suggest there being an average of charging -0.003 less. This also would imply a slightly negative correlation and showing that the claim is not true. The 95% confidence interval exists between `r round(mean(gas_stop_bootstrap$diffmean),3) - 2* sd(gas_stop_bootstrap$diffmean)` and `r round(mean(gas_stop_bootstrap$diffmean),3) + 2* sd(gas_stop_bootstrap$diffmean)`. 
+
+
+### Part d)
+```{r}
+gas_highway_bootstrap <- do(10000)*diffmean(Price ~Highway,data=resample(gas_sample))
+
+ggplot(gas_highway_bootstrap, aes(x = diffmean)) + geom_histogram(fill = "darkslategray4", color = "black") + labs(x = "Difference in means", y = "Frequency", title = "Bootstrap of Mean Price when located near Highways")
+```
+Claim: There will be a higher price associated with being near a highway. 
+
+Evidence & Conclusion: Looking at the graph there is a higher correlation as there is an average peak around being near a stop sign and its frequency with regards to cost. The mean is `r round(mean(gas_highway_bootstrap$diffmean),3)`. With 95% confidence the points lie between `r round(mean(gas_highway_bootstrap$diffmean)- 2* sd(gas_highway_bootstrap$diffmean),3)` and `r round(mean(gas_highway_bootstrap$diffmean) + 2* sd(gas_highway_bootstrap$diffmean),3)`. This would mean there is a high likelihood being close to a highway would lead to an increase in prices.
+
+
+### Part e)
+```{r}
+
+gas_price <- gas_price |> mutate(is_shell = (Brand == "Shell"))
+
+gas_shell_bootstrap <- do(10000) * diffmean(Price ~ is_shell, data = resample(gas_price))
+
+ggplot(gas_shell_bootstrap, aes(x = diffmean)) + 
+  geom_histogram(fill = "darkslategray", color = "black", bins = 30) + 
+  labs(x = "Difference in Means", y = "Frequency", title = "Bootstrap of Mean Price for Shell vs. Other Brands")
+
+```
+Claim: Shell won't have any significant differences in pricing.
+
+Evidence & Conclusion: Looking at the distribution, there seems to be a positive correlation, meaning, there is a difference in payment between Shell and the rest of the companies. The mean price difference is around `r round(mean(gas_shell_bootstrap$diffmean),3) ` while the 95% confidence interval is between `r round(mean(gas_shell_bootstrap$diffmean) - 2* sd(gas_shell_bootstrap$diffmean),3)` and `r round(mean(gas_shell_bootstrap$diffmean) + 2* sd(gas_shell_bootstrap$diffmean),3)`. This would again show, the claim is false and there is merit behind the idea that Shell charges more. 
+
+
+## Problem 2
+
+### Part a)
+```{r}
+
+s_class <- read.csv("sclass.csv")
+s_class_2011 <- s_class |> filter(year == 2011 & trim == "63 AMG")
+
+mileage_bootstrap <- do(10000) * mean(~mileage, data = resample(s_class_2011))
+
+
+ggplot(mileage_bootstrap, aes(x = mean)) + 
+  geom_histogram(fill = "darkslategray2", color = "black", bins = 30) + 
+  labs(x = "Mean milage", y = "Frequency", title = "Mean milage of used 2011 63 AMG cars")
+
+```
+The mean mileage is around `r round(mean(mileage_bootstrap$mean),3)` or in normal notation around 29008 miles. The standard deviation is `r round(sd(mileage_bootstrap$mean),3)` and the 95% confidence interval is from `r round(mean(mileage_bootstrap$mean) - 2 *sd(mileage_bootstrap$mean), 3)` to `r round(mean(mileage_bootstrap$mean) + 2 *sd(mileage_bootstrap$mean), 3)` which is around 26161.604 to 31842.531 miles. 
+
+### Part b)
+
+```{r}
+s_class_2014 <- s_class |> filter(year == 2014 & trim == "550") |> mutate(isBlack = (color == "Black"))
+
+color_bootstrap <- do(10000) * mean(~isBlack, data = resample(s_class_2014))
+
+
+ggplot(color_bootstrap, aes(x = mean)) + 
+  geom_histogram(fill = "darkslategray3", color = "black", bins = 30) + 
+  labs(x = "Proprtion of black cars", y = "Frequency", title = "Bootstrap of Proportion of black 2014 550s")
+```
+The mean count for black cars is around `r round(mean(color_bootstrap$mean),3)`. The standard deviation is `r round(sd(color_bootstrap$mean),3)` and the 95% confidence interval is from `r round(mean(color_bootstrap$mean) - 2 *sd(color_bootstrap$mean), 3)` to `r round(mean(color_bootstrap$mean) + 2 *sd(color_bootstrap$mean), 3)`
+
+
+
+## Question 3
+
+
+### part a)
+```{r}
+
+pilot_info <- read.csv('nbc_pilotsurvey.csv')
+
+pilot_info_filtered <- pilot_info |> filter(Show == "Living with Ed" |
+Show == "My Name is Earl")
+
+pilot_bootstrap <- do(10000) * diffmean(Q1_Happy ~ Show, data = resample(pilot_info_filtered, replace = TRUE))
+
+
+ggplot(pilot_bootstrap, aes(x = diffmean)) + 
+  geom_histogram(fill = "darkgoldenrod3", color = "black", bins = 30) + 
+  labs(x = "Difference in Mean Happiness (Ed - Earl)", 
+       y = "Frequency", 
+       title = "Bootstrap Distribution of Happiness Rating Difference")
+
+```
+
+Question: Does "Living with Ed" or "My Name is Earl" make people happier on average?
+
+Approach: Filter the dataset to include only rows where the Show is "Living with Ed" or "My Name is Earl". Run a bootstrap on the subset of data. Depict a histogram for easier time visualizing.
+
+
+Evidence & Conclusion: The solution provided uses the mean of the bootstrapped data, the 95% confidence interval (2 standard deviations from the mean) and a histogram to depict the data. 
+
+The mean is `r round(mean(pilot_bootstrap$diffmean),3)`. The 95% confidence interval runs from `r round(mean(pilot_bootstrap$diffmean) - 2 * sd(pilot_bootstrap$diffmean),3)` to `r round(mean(pilot_bootstrap$diffmean) + 2 * sd(pilot_bootstrap$diffmean),3)`. Since the interval passes through 0, it cannot be said to be certain, however, the slight bias to the left would mean that the edge can be given to My Name is Earl. 
+
+### part b)
+
+
+```{r}
+
+pilot_info_filtered <- pilot_info |> filter(Show == "The Biggest Loser" | Show == "The Apprentice: Los Angeles")
+
+pilotB_bootstrap <- do(10000) * diffmean(Q1_Annoyed ~ Show, data = resample(pilot_info_filtered, replace = TRUE))
+
+
+ggplot(pilotB_bootstrap, aes(x = diffmean)) + 
+  geom_histogram(fill = "deepskyblue3", color = "black", bins = 30) + 
+  labs(x = "Difference in Mean Annoyed (Loser - Apprentice)", 
+       y = "Frequency", 
+       title = "Bootstrap Distribution of Annoyed Rating Difference")
+
+```
+
+Question: Which reality/contest show made people feel more annoyed: "The Biggest Loser" or "The Apprentice: Los Angeles"?
+
+Approach: Filter the dataset for Show == "The Biggest Loser" or "The Apprentice: Los Angeles".  Run a bootstrap on the subset of data. Depict a histogram for easier time visualizing.
+
+Evidence & Conclusion: The solution provided uses the mean of the bootstrapped data, the 95% confidence interval (2 standard deviations from the mean) and a histogram to depict the data. 
+
+According to the graph, there is a pretty high negative correlation mean. `r round(mean(pilotB_bootstrap$diffmean),3)`. However, and since the confidence interval ranges from `r round(mean(pilotB_bootstrap$diffmean) - 2* sd(pilotB_bootstrap$diffmean),3)` to `r round(mean(pilotB_bootstrap$diffmean) + 2* sd(pilotB_bootstrap$diffmean),3)`, with 95% confidence, the show to garner a greater mean annoyed rating is "The Biggest Loser".
+
+
+### part c)
+
+```{r}
+
+pilot_info_filtered <- pilot_info |> filter(Show == "Dancing with the Stars")
+
+pilot_info_filtered <- pilot_info_filtered |> mutate(aboveFour = Q2_Confusing >= 4)
+
+pilotC_bootstrap <- do(10000) * mean(~aboveFour, data = resample(pilot_info_filtered, resample = TRUE))
+
+ggplot(pilotC_bootstrap, aes(x = mean)) + 
+  geom_histogram(fill = "deepskyblue2", color = "black", bins = 30) + 
+  labs(x = "Difference in Mean Confused", 
+       y = "Frequency", 
+       title = "Bootstrap Distribution of Confused on Dancing Show")
+```
+
+Question: What proportion of American TV watchers would likely find "Dancing with the Stars" confusing?
+
+Approach: Filter the dataset for Show == "Dancing with the Stars". Mutate for ratings above 4 in terms of confusing. Run a bootstrap on the subset of data with a mean function. Depict a histogram for easier time visualizing.
+
+
+Evidence & Conclusion: The solution provided uses the mean of the bootstrapped data, the 95% confidence interval (2 standard deviations from the mean) and a histogram to depict the data. 
+
+The interval goes from  `r round(mean(pilotC_bootstrap$mean) - 2 * sd(pilotC_bootstrap$mean),3)` to `r round(mean(pilotC_bootstrap$mean) + 2 * sd(pilotC_bootstrap$mean),3)`. This would mean that since the values in the 95% confidence interval are positive, it can be said with 95% confidence there is confusion that occurs when watching the show Dancing with the Stars.
+
+
+## Problem 4
+
+```{r}
+ebay <- read.csv('ebay.csv')
+ebay <- ebay |> mutate(rev_ratio = rev_after/rev_before)
+
+ebay_bootstrap <- do(10000) * diffmean(rev_ratio~ adwords_pause, data = resample(ebay, replace = TRUE))
+
+ggplot(ebay_bootstrap, aes(x = diffmean)) + 
+  geom_histogram(fill = "deepskyblue4", color = "black", bins = 30) + 
+  labs(x = "Difference in Mean Revenue Ratio (Treatment - Control)", 
+       y = "Frequency", 
+       title = "Bootstrap Distribution of Revenue Ratio Difference")
+```
+Question: The question is to see if paid search advertising on Google creates extra revenue for EBay.
+
+Approach: Used bootstrapping via monte carlo simulation (n = 10000) to gather enough data. Also used a 95% confidence interval to check for significance.
+
+Evidence: The intervals lie between `r round(mean(ebay_bootstrap$diffmean) - 2 * sd(ebay_bootstrap$diffmean),3)` to `r round(mean(ebay_bootstrap$diffmean) + 2 * sd(ebay_bootstrap$diffmean),3)`. This would mean that since the ends are bounded below 0, it can be 95% confidently said that pausing ads reduced revenue.
+
+Conclusion: Noticing that there being a loss after pausing ads leads to the conclusion that paid ads were driving additional revenue. This would mean that companies like EBay, although having to pay extra to be featured in the search engine, would benefit from doing so. 
+
+
