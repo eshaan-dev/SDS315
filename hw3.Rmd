@@ -36,7 +36,7 @@ upper_ci <- mean(gas_price_bootstrap$diffmean) + 2 * sd(gas_price_bootstrap$diff
 
 Claim: There will be a higher charge asserted when there is little to no competition nearby. 
 
-Evidence & Conclusion: According to the bootstrap test, there is a mean of `r round(avg_price,3)`. In the context of the problem, it would mean that there is, on average, a reduction of price and therefore would signify that there is no increase in price when there is little to no competition nearby. Furthermore, with 95% confidence, the values lie between `r round(lower_ci,3)` and `r round(upper_ci,3)` meaning a reduction by 5.6 cents and increase by 0.009 cents.
+Evidence & Conclusion: According to the bootstrap test, there is a mean of `r round(avg_price,3)`. In the context of the problem, it would mean that there is, on average, an increase of price and therefore would signify that there is increase in price when there is little to no competition nearby. Furthermore, with 95% confidence, the values lie between `r round(lower_ci,3)` and `r round(upper_ci,3)`. However, since it includes zero, it cannot be said for certain. 
 
 
 ### Part b)
@@ -60,7 +60,7 @@ ggplot(gas_stop_bootstrap, aes(x = diffmean)) + geom_histogram(fill = "chocolate
 Claim: There will be a higher correlation between being near a stoplight and the price. This would mean that gas stations near stoplights will charge a higher price.
 
 
-Evidence & Conclusion: By looking at the graph it looks like an even distribution centered slightly off zero towards a mean of around `r round(mean(gas_stop_bootstrap$diffmean),3)`. This would suggest there being an average of charging -0.003 less. This also would imply a slightly negative correlation and showing that the claim is not true. The 95% confidence interval exists between `r round(mean(gas_stop_bootstrap$diffmean),3) - 2* sd(gas_stop_bootstrap$diffmean)` and `r round(mean(gas_stop_bootstrap$diffmean),3) + 2* sd(gas_stop_bootstrap$diffmean)`. 
+Evidence & Conclusion: By looking at the graph it looks like an even distribution centered slightly off zero towards a mean of around `r round(mean(gas_stop_bootstrap$diffmean),3)`. This would suggest there being an average of charging 0.003 more This also would imply a slightly negative correlation and showing that the claim is true. The 95% confidence interval exists between `r round(mean(gas_stop_bootstrap$diffmean),3) - 2* sd(gas_stop_bootstrap$diffmean)` and `r round(mean(gas_stop_bootstrap$diffmean),3) + 2* sd(gas_stop_bootstrap$diffmean)`. 
 
 
 ### Part d)
