@@ -12,7 +12,7 @@ library(tidyverse)
 library(mosaic)
 ```
 
-Link to github
+Link to github: https://github.com/eshaan-dev/SDS315/tree/Homework-4
 
 # Question 1
 
