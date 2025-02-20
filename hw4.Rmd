@@ -1,0 +1,151 @@
+---
+title: "Hw4"
+author: "Eshaan Singh"
+date: "2025-02-15"
+output: pdf_document
+---
+
+```{r setup, include=FALSE, message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(ggplot2)
+library(tidyverse)
+library(mosaic)
+```
+
+Link to github
+
+# Question 1
+
+```{r}
+
+bootstrap_sim <- do(100000)* mean(rbinom(2021, 1, 0.024))
+ggplot(bootstrap_sim) + geom_histogram(aes(x = mean),bins = 30, color = "black", fill = "lightblue")
+p_value <- mean(bootstrap_sim >= 70/2021)
+print(round(p_value,3))
+```
+
+The null hypothesis being tested is that if there is a probability of 2.4% trades being flagged, then there is something illegal going on and there should be an investigation into the company. 
+
+To measure against the null hypothesis, there will be the monte-carlo simulation with a re sampling that calculates the mean of each sample. This would mean that there would be a proportion of how many iterations exceed the desired ratio and that can be filtered out using the p value constraint. 
+As the p value is around `0.002`, this is a fairly small threshold and therefore can say that the null hypothesis is rejected. This would support the alternative hypothesis that their trading activity is unusual and indicates a possibility of insider trading. 
+
+\newpage
+# Question 2
+
+```{r}
+
+bootstrap_health <- do(100000) * sum(rbinom(1500, 1, 0.03))
+
+
+ggplot(bootstrap_health, aes(x = sum)) + 
+  geom_histogram(bins = 30, color = "black", fill = "lightblue3") +
+  labs(title = "Distribution of Simulated Violations",
+       x = "Number of Violations", y = "Frequency")
+
+p_value <- mean(bootstrap_health$sum >= 50)
+print(round(p_value,3))
+
+```
+
+In this case, the null hypothesis is to check if there is a standard 3% citation baseline for being flagged due to random chance.
+
+To measure against the null hypothesis, there will be the monte-carlo simulation with a re sampling that calculates the mean of each sample. This would mean that there would be a proportion of how many iterations exceed the desired ratio and that can be filtered out using the p value constraint.
+
+The P value differs greatly in this case as it measure to be `0.244`. This would mean that there is a 24.4% chance that there can be 8 or more violations due to chance. Since this probability is relatively high, there is not enough evidence to conclude that there's a high violation rate. In this case, the null hypothesis is accepted. 
+
+\newpage
+# Question 3
+
+```{r}
+
+observed <- c(85, 56, 59, 27, 13)
+
+expected <- c(0.30, 0.25, 0.20, 0.15, 0.10) * 240
+
+chi_squared_statistic = function(observed, expected) {
+  sum((observed - expected)^2 / expected)
+}
+
+chi_res <- round(chi_squared_statistic(observed,expected),3)
+
+
+chi_data <- chisq.test(observed, p = expected / sum(expected))
+print(round(chi_data$p.value,3))
+```
+
+The null hypothesis in this case would be that the judge’s selection process does not systematically change the representation of its group.
+
+Since there is a multinomial setting, it would be best to use a chi-squared test to determine statistical significance. Then using the chisq function, there can be a detailed p value that is used to back up the claim. 
+
+After running the code, the chi-squared result was 12.426. This would mean that there is quite the difference between the observed and expected values. This difference would suggest there should be a rejection of the null. Furthermore, this is supported by the low p value of `0.014`. In conclusion, the judge’s selection process does systematically change the representation of its group.
+
+\newpage
+# Question 4
+
+## Part A
+```{r}
+brown_sentences <- readLines("brown_sentences.txt")
+letter_frequencies <- read.csv("letter_frequencies.csv")
+
+
+letter_frequencies$Probability = letter_frequencies$Probability / sum(letter_frequencies$Probability)
+
+
+calculate_chi_squared = function(sentence, freq_table) {
+  
+
+  clean_sentence = gsub("[^A-Za-z]", "", sentence)
+  clean_sentence = toupper(clean_sentence)
+  
+
+  observed_counts = table(factor(strsplit(clean_sentence, "")[[1]], levels = freq_table$Letter))
+  
+
+  total_letters = sum(observed_counts)
+  expected_counts = total_letters * freq_table$Probability
+  
+
+  chi_squared_stat = sum((observed_counts - expected_counts)^2 / expected_counts, na.rm=TRUE)
+  
+  return(chi_squared_stat)
+}
+
+chi_squared_values = sapply(brown_sentences, calculate_chi_squared, freq_table = letter_frequencies)
+
+hist(chi_squared_values, main="Chi-Squared Distribution of Letter Frequencies")
+print(round(mean(chi_squared_values),3))
+
+```
+Part A creates a null hypothesis to test the LLM watermark on. It seems like the distribution is centered around a mean of around 27. This information can be useful in Part B.
+
+
+## Part B
+
+```{r}
+
+sentences <- c(
+  "She opened the book and started to read the first chapter, eagerly anticipating what might come next.",
+  "Despite the heavy rain, they decided to go for a long walk in the park, crossing the main avenue by the fountain in the center.",
+  "The museum’s new exhibit features ancient artifacts from various civilizations around the world.",
+  "He carefully examined the document, looking for any clues that might help solve the mystery.",
+  "The students gathered in the auditorium to listen to the guest speaker’s inspiring lecture.",
+  "Feeling vexed after an arduous and zany day at work, she hoped for a peaceful and quiet evening at home, cozying up after a quick dinner with some TV, or maybe a book on her upcoming visit to Auckland.",
+  "The chef demonstrated how to prepare a delicious meal using only locally sourced ingredients, focusing mainly on some excellent dinner recipes from Spain.",
+  "They watched the sunset from the hilltop, marveling at the beautiful array of colors in the sky.",
+  "The committee reviewed the proposal and provided many points of useful feedback to improve the project’s effectiveness.",
+  "Despite the challenges faced during the project, the team worked tirelessly to ensure its successful completion, resulting in a product that exceeded everyone’s expectations."
+)
+
+chi_squared_values <- sapply(sentences, calculate_chi_squared, freq_table = letter_frequencies)
+
+
+p_values <- sapply(chi_squared_values, function(x) mean(chi_squared_values >= x))
+
+
+results <- data.frame(Chi_Squared = round(chi_squared_values, 3), P_Value = round(p_values, 3))
+
+
+print(data.frame(Index = 1:10, P_Value = results$P_Value))
+
+```
+After taking the Chi-Squared difference between the expected (null) and the outcome (10 sentences), there is a clear outlier in which the p value is less than 0.05 which is sentence 6. This sentence is the following: `Feeling vexed after an arduous and zany day at work, she hoped for a peaceful and quiet evening at home, cozying up after a quick dinner with some TV, or maybe a book on her upcoming visit to Auckland.` As it has a p-value lower than 0.05, it would mean that there is a very low chance the null hypothesis occurs, therefore hinting at the fact that it is generated by an LLM. 
