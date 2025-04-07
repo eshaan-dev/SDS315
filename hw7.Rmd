@@ -1,0 +1,244 @@
+---
+title: "Homework 7"
+author: "Eshaan Singh - es45858"
+date: "2025-04-02"
+output: pdf_document
+
+---
+
+Github: https://github.com/eshaan-dev/SDS315/tree/homework-7
+
+```{r setup, include=FALSE}
+  library(ggplot2)
+  library(tidyverse)
+  library(mosaic)
+  library(MatchIt)
+  data <- read.csv('armfold.csv')
+  data_turnout <- read.csv('turnout.csv')
+```
+
+
+```{r include=FALSE}
+  male_ct <- data %>% filter(Sex == "Male") %>% nrow()
+  female_ct <- data %>% nrow() - male_ct
+  male_prop <- data %>% filter(Sex == "Male") %>% summarise(prop = sum(LonR_fold))
+  
+
+  male_prop <- male_prop/male_ct
+  female_prop <- data %>% filter(Sex == "Female") %>% summarise(prop = sum(LonR_fold))
+  female_prop <- female_prop/female_ct
+  
+  diff_prop <- male_prop-female_prop
+  
+  prop.test(LonR_fold ~ Sex, data=data)
+
+```
+
+## Part A {#Part-A}
+
+The number of males is **106** and number of females is **111**. 
+
+The sample proportion of males who folded their left arm on top is **0.472**
+
+The sample proportion of females who folded their left arm on top is **0.423**
+
+## Part B {#Part-B}
+
+The observed difference is 0.472 - 0.423 = **0.048**
+
+## Part C {#Part-C}
+
+
+In order to calculate the 95% confidence interval, there are three important pieces: The mean or expected value, the Z* value which corresponds to the multiplier of the error and determines how encompassing the interval is. The last piece is the Standard Error.
+
+The difference in proportions error is described as follows:
+
+
+\[
+SE = \sqrt{\frac{\hat{p}_1(1-\hat{p}_1)}{N_1} + \frac{\hat{p}_2(1-\hat{p}_2)}{N_2}}
+\]
+
+=
+
+\[
+SE = \sqrt{\frac{0.4716981 (1- 0.4716981)}{106} + \frac{0.4234234 (1- 0.4234234)}{111}}
+\]
+
+\[
+SE = 0.06745633
+\]
+
+
+The Z* value is **1.96** for 2 standard deviations out, otherwise, a 95% confidence interval. 
+
+Furthermore, the mean is the observed difference which was calculated in Part B as **0.048**
+
+
+According to the formula listed, the 95% confidence interval can be calculated by: \[ \bar{x} \pm Z^* * SE(\bar{x})\]
+\begin{center}
+  = [`r 0.04827469 + 1.96 * -0.06745633`, `r 0.04827469 - 1.96 * -0.06745633`]
+\end{center}
+
+
+## Part D
+
+If we were to sample the difference in proportion between men and women who have their left hand over their right when crossed, then we would expect that the true value of the proportion lies between `r 0.04827469 + 1.96 * -0.06745633` and `r 0.04827469 - 1.96 * -0.06745633`. 
+
+## Part E
+
+The standard error in this case is calculating the range or the standard deviation of the sampled distribution that was obtained via the prop.test or via calculation based on the assumption of a normal distribution with respect to a sample statistic. In this case, it was the difference in proportions. This would then be compared to the population value of that statistic.
+
+## Part F
+
+In this context, the sampling distribution refers to the distribution of the proportional difference over many iterations. What stays the same is the method of sampling as well as the sample size. Furthermore, since it is sampled from the same population, the global proportion of men and women folding hands will stay the same.
+
+However, what differs from sample to sample is the proportion and the difference of proportions. This is true because each sample contains a slightly different number of men and women with hands crossed due to the randomness of the sample. This would result in the expected value to be different and the confidence interval to as well. 
+
+## Part G
+
+The Central Limit Theorem tells us that the sampling distribution of the difference in proportions will be approximately normal and centered at the true difference in population proportions. If we take a large number of random samples, their average difference in proportions will converge to this true value. This is guaranteed by the Law of Large Numbers.
+
+## Part H
+
+Since the interval contains the value 0, there is still a possibility that the true value can be 0 and therefore, the null cannot be rejected completely. Therefore, the answer would be that there is no sex difference in arm folding. 
+
+## Part I
+
+Repeating this with different random samples would result in the confidence interval being different. This is true because of the inherit randomness of the samples. Not all men or women choose one hand over the over in unison, each person has a preference. That is the reason for conducting multiple samples, as it would give a good estimate about how the university students act.
+
+However, if we repeated the experiment many times and calculated a confidence interval each time, then 95% of those intervals would contain the true difference in population proportions.
+
+
+# Question 2
+
+## Part A
+
+```{r, include=FALSE}
+total_called <- data_turnout %>% filter(GOTV_call == 1) %>% nrow()
+total_not_called <- data_turnout %>% filter(GOTV_call == 0) %>%  nrow()
+call_true <- data_turnout %>% filter(GOTV_call == 1 & voted1998 == 1) %>% nrow()
+call_false <- data_turnout %>% filter(GOTV_call == 0 & voted1998 == 1) %>% nrow()
+
+prop_called_voted <- call_true / total_called
+prop_not_called_voted <- call_false / total_not_called
+
+prop.test(voted1998 ~ GOTV_call, data=data_turnout) 
+
+```
+The proportion of those receiving a GOTV call who voted in 1998 = **0.648**
+
+The sample proportion of those not receiving a GOTV call who voted in 1998 = **0.444**
+
+A large-sample 95% confidence interval for the difference in these two proportions = **[-0.266,-0.141]**
+
+## Part B
+
+```{r, include = FALSE }
+
+prop.test(voted1998 ~ voted1996, data = data_turnout)
+prop.test(GOTV_call ~ voted1996, data = data_turnout)
+
+prop.test(voted1998  ~ MAJORPTY, data = data_turnout)
+prop.test(GOTV_call  ~ MAJORPTY, data = data_turnout)
+
+t.test(AGE ~ GOTV_call, data = data_turnout)
+t.test(AGE ~ voted1998, data = data_turnout)
+```
+For a variable to be a confounder, it would independently affect the output variables we are measuring. In this case, it would be getting the call and voting in the 1998 election. 
+
+To verify a variable is a confounder, it would mean there is a noticeable difference between the outputs of the confounding variable and the output variables. 
+
+**For the following results in (x, y) format, x represents the 0 state or no and y represents the answer in terms of the 1 or yes state.**
+
+Showing this in action. We can look at the variable of if someone voted in 1996 to see how likely they are to vote again in 1998. This can be figured out by looking at the difference in means. This results in: (`r round(prop(voted1998 ~ voted1996, data = data_turnout),3)`). In other words, if someone voted in 1996, they are more than three times as likely to vote in the 1998 election. Looking at if they are likely to get a call, we can see the difference in means: (`r round(prop(GOTV_call ~ voted1996, data = data_turnout),3)`). This would mean someone who voted would be around two times as likely to receive a call. Since there are clear signs of impact between the two variables in consideration, it is conclusive that voting in 1996 is a confounder in our setting. 
+
+We can do the same for the MAJORPTY variable. Checking its impact on voting 1998, it would be (`r round(prop(voted1998  ~ MAJORPTY, data = data_turnout),3)`). This would mean people who is registered as a member of either one of the two major U.S. political parties would vote 13% higher than those who are not registered. Furthermore, for the other variable, it would be (`r round(prop(GOTV_call  ~ MAJORPTY, data = data_turnout),3)`). This would mean there's around a 7% difference and it would imply this variable would be a confounder.
+
+
+```{r, echo = FALSE, width = 50, fig.width=3, fig.height=3}
+ggplot(data_turnout) + geom_boxplot(aes(x=factor(voted1998), y=AGE)) + labs(x = "Voted in 1998", y = "Age of the voters", title = "Impact of age on 1998 elections")
+ggplot(data_turnout) + geom_boxplot(aes(x=factor(GOTV_call), y=AGE)) + labs(x = "Calls Recieved", y = "Age", title = "Impact of age on calls recieved")
+```
+
+Finally, the last variable, which is the impact of age, looking at the graphs **(reference above)**, there seems to be a noticeable difference between the ages based on being associated with the election votes and being associated with a party leading to the conclusion of the age variable being a confounder. 
+
+To verify all this, we can run large sample tests to ensure we can reject the null hypothesis. If there is a 0 in the confidence interval and if the p-value is large, this cannot be the case, even if there is a strong trend.
+
+Looking at the voted 1998 vs 1996 intervals (gathered using prop.test), we can see it is [0.393, 0.428], and the p-value is < 2.2e-16. Repeating this for GOTV_call and 1996, we can see that the interval is [0.01060767, 0.02195834] and the p-value is 2.188e-08. This shows that the values are statistically significant and since it doesnt contain zero that 1996 is indeed a confounder. 
+
+Moving onto the MajorPTY variable, we can run the same prop.test function to get a large sample confidence interval. MajorPTY vs voted1998 results in the interval being [0.1111651, 0.1534422] with a p-value of 2.2e-16. Similarly, we have MajorPTY vs GOTV_call with an interval of [0.0004615944, 0.0129180093] and a p-value of 0.0505. This would also mean that MajorPTY is very strongly a confounder (can be questioned becuase of the p-value being > 0.05)
+
+Finally, with the AGE variable, we can run a t.test instead of a prop.test. This would result in a p value of 2.817e-11 and a confidence interval of [-11.395051, -6.369644] for AGE vs GOTV_call. Similarly for AGE vs voted_1998, we have [-11.182008, -9.820602] and a p value of < 2.2e-16. This would also mean that AGE is a confounder. 
+
+
+## Part C
+
+```{r, include = FALSE}
+
+vote_matched = matchit(GOTV_call ~ voted1996 + AGE + MAJORPTY, data = data_turnout, ratio=5) %>% match.data
+
+# MajorPTY
+diffprop(GOTV_call~ MAJORPTY, data = vote_matched)
+diffprop(GOTV_call~ MAJORPTY, data = data_turnout)
+
+#Voted1996
+diffprop(GOTV_call~ voted1996, data = vote_matched)
+diffprop(GOTV_call~ voted1996, data = data_turnout)
+
+
+#Large sample confidence intervals
+
+prop.test(GOTV_call ~ voted1996, data =vote_matched)
+t.test(AGE ~ GOTV_call, data =vote_matched)
+prop.test(GOTV_call ~ MAJORPTY, data =vote_matched)
+```
+```{r, include = FALSE}
+
+total_called_matched <- vote_matched %>% filter(GOTV_call == 1) %>% nrow()
+total_not_called_matched <- vote_matched %>% filter(GOTV_call == 0) %>%  nrow()
+call_true_matched <- vote_matched %>% filter(GOTV_call == 1 & voted1998 == 1) %>% nrow()
+call_false_matched <- vote_matched %>% filter(GOTV_call == 0 & voted1998 == 1) %>% nrow()
+
+call_true / total_called
+call_false / total_not_called
+
+
+prop.test(c(call_true_matched, call_false_matched), c(total_called_matched, total_not_called_matched))
+
+```
+
+Using the matchit function, we can match the data such that we can eliminate the confounders. This would result in data that should be theoretically closer matching than the previous ones. We can test this by running diff prop and seeing the difference between the datasets. 
+
+For the MajorPTY variable, running diffprop results in `r round(diffprop(GOTV_call~ MAJORPTY, data = data_turnout),3)` for the unmatched dataset and `r round(diffprop(GOTV_call~ MAJORPTY, data = vote_matched),3)` for the matched dataset. This shows a slight improvement. 
+
+For the voted1996 variable, we can do the same thing. Running diffprop for the unmatched dataset results in `r round(diffprop(GOTV_call~ voted1996, data = data_turnout),3)` and with the matched dataset `r round(diffprop(GOTV_call~ voted1996, data = vote_matched),3)` which shows improvement.
+
+
+```{r, echo = FALSE, fig.width = 3, fig.height = 3}
+ggplot(vote_matched) + geom_boxplot(aes(x=factor(GOTV_call), y=AGE)) + labs(x = "Getting called", y = "Age", title = "Getting Called vs Age matched data")
+ggplot(data_turnout) + geom_boxplot(aes(x=factor(GOTV_call), y=AGE)) + labs(x = "Getting Called", y = "Age", title = "Getting Called vs Age")
+```
+
+For the last variable, we can observe the difference through the graphs:
+There is a clear difference between the two graphs with the matched data being more similar. 
+
+We can further support this by taking the prop.test and t.test of the variables to get the confidence intervals and the p-values. To reiterate, if the p-value is large and/or the confidence interval contains zero, we cannot reject the null hypothesis. In other words, it is no longer a confounder. 
+
+For voted1996, we can see the confidence interval is [-0.04192462, 0.04192462] with the p value being 1. 
+
+For AGE, the t-test results in a confidence interval of [-2.760374  2.677783] with a p value being 0.9762.
+
+For MajorPTY, the confidence interval is [-0.05556967, 0.04548700] with a p value of 0.9064.
+
+All this confirms that these variables are no longer confounders. 
+
+
+### Calculations for matched dataset
+
+The proportion of those receiving a GOTV call who voted in 1998 = **0.6477733**.
+
+The sample proportion of those not receiving a GOTV call who voted in 1998 = **0.4442449**.
+
+Conducting the large sample confidence interval, the result is: **[0.01045353, 0.14663149]** with a p value of **0.02682**. 
+
+Since the P-value is statistically significant and there is no 0 in the confidence interval, we can conclude that although there were confounders, there is still an impact of the GOTV call on the likelihood of voting in the 1998 election. 
