@@ -1,0 +1,115 @@
+---
+title: "hw8"
+author: "Eshaan Singh"
+date: "2025-04-10"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+
+library(ggplot2)
+library(tidyverse)
+library(mosaic)
+library(dplyr)
+creatinine = read.csv('creatinine.csv')
+covid = read.csv('covid.csv')
+milk = read.csv('milk.csv')
+
+```
+
+```{r, include = FALSE}
+
+lm0 = lm(creatclear ~ age, data = creatinine)
+coef(lm0)
+
+```
+
+
+# Question 1
+
+## Part A
+
+Here is a graph with a linear relationship between its variables. We can fit a linear model to the data and figure out what certain projected outcomes are given specific input variables. 
+
+In this case, we are trying to figure out what is an estimated creatinine level for someone who is 55 years old. Using the `lm()` function in R, we get the approximate equation to be : `y = 147.8 - 0.62 * x`. We can use this to plug in for x = 55. This would result in having an approximate creatinine level of 113.7 mL/minute. 
+
+## Part B
+
+Using the same equation from the last part, we can see that there is about a change of -0.62 ml/minute per year. The reason this coefficient has this units is becuase x is given in years, to cancel out the years and compute the y value which is measured in ml/minute, we have to add an additional unit which is per year. And since there is a decrease in the creatinine levels as age goes up, it would make sense that the change is negative. 
+
+
+## Part C
+
+```{r, include = FALSE}
+
+diff_fourty = (135 - (147.8 - 0.62 * 40))
+
+diff_sixty = (112 - (147.8 - 0.62 * 60))
+
+
+```
+
+To understand what is considered healthy, we need to see relative to their age, the difference between their levels and the projected level. If one difference is positive and higher than the other, we can state that they are projected to be healthier than the other relative to their age. We can calcualte the age for the 40 year old by using the following equation: `(135 - (147.8 - 0.62 * 40))` = **12**. Similarly for the 60 year old, we can use the following equation: `(112 - (147.8 - 0.62 * 60))` = **1.4**. We know that having a positive difference in this case would mean that the level is higher than projected which is healthier according to the description. This would mean, we can conclude the **40 year old is projected to be healthier than the 60 year old.**
+
+# Question 2
+
+## Part A
+
+```{r, include = FALSE}
+
+colnames(covid)
+
+covid_spain = covid %>%  filter(country == "Spain")
+covid_italy = covid %>%  filter(country == "Italy")
+
+ggplot(covid_italy) + geom_point(aes(x = (days_since_first_death), y = log(deaths))) 
+
+lm_italy = lm(log(deaths) ~ days_since_first_death, data = covid_italy)
+lm_italy$coefficients
+
+mc_italy = do(1000)*lm(log(deaths) ~ days_since_first_death, data = resample(covid_italy))
+
+mc_spain = do(1000)*lm(log(deaths) ~ days_since_first_death, data = resample(covid_spain))
+
+# y = 2.76932055 + 
+```
+
+```{r, include = FALSE}
+confint(mc_spain)
+```
+By bootstrapping the `lm()` function, we can see that the growth rate is roughly **0.183** for the Italy data. Furthermore, the doubling time, as per the formula in class, is `70/18.3` which is around **3.8** days.
+
+95% bootstrapped confidence interval for growth rate: `[0.159, 0.206]`
+
+## Part B
+Doing the same for Spain data, we find out that the growth rate is roughly **0.276** and the doubling time is **2.5** days. 
+
+95% bootstrapped confidence interval for growth rate: `[0.234, 0.320]`
+
+
+## Part C
+
+Here is a line graph visualizing how the spread of Covid deaths happened since its first death in the two countries. 
+
+```{r, echo = FALSE, fig.width=3, fig.height=3}
+
+ggplot(covid) + geom_line(aes(x = days_since_first_death, y = deaths, color = country)) + labs(x = "Days since First Death", y = "Number of Deaths", title = "Number of Deaths since First Death")
+
+```
+
+# Question 3
+
+```{r, include = FALSE}
+colnames(milk)
+ggplot(milk) + geom_point(aes(x = (price), y = (sales))) 
+
+mc_milk = do(1000)*lm(log(sales) ~ log(price), data = resample(milk))
+confint(mc_milk)
+```
+After using the power laws model, we can see that the equation for best fit is: \[y = 112.236 * x ^{-1.619}\] In other words, the price elasticity is ~`-1.618`. This would mean a 1% change in price would yield 1.619% decrease sales respectively. 
+
+To measure the elasticity, we have to establish a correlation between the predictor variable and the outcome. By plotting the `milk.csv` data with log(y) and log(x), we can see a well established linear trend that follows the format of \[ \log y = \log k + \beta * \log x\] 
+
+Using the bootstrap, we find that log k is ~4.72 and beta is around -1.619 which is how it was found. 
+
+95% bootstrapped confidence interval for log price: `[-1.769, -1.450]`
