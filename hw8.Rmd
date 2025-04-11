@@ -91,7 +91,7 @@ Doing the same for Spain data, we find out that the growth rate is roughly **0.2
 
 Here is a line graph visualizing how the spread of Covid deaths happened since its first death in the two countries. 
 
-```{r, echo = FALSE, fig.width=3, fig.height=3}
+```{r, echo = FALSE, fig.width=6, fig.height=3}
 
 ggplot(covid) + geom_line(aes(x = days_since_first_death, y = deaths, color = country)) + labs(x = "Days since First Death", y = "Number of Deaths", title = "Number of Deaths since First Death")
 
