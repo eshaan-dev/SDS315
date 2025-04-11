@@ -1,6 +1,6 @@
 ---
-title: "hw8"
-author: "Eshaan Singh"
+title: "Homework 8"
+author: "Eshaan Singh - es45858"
 date: "2025-04-10"
 output: pdf_document
 ---
@@ -23,7 +23,7 @@ lm0 = lm(creatclear ~ age, data = creatinine)
 coef(lm0)
 
 ```
-
+Link to github: https://github.com/eshaan-dev/SDS315/tree/Homework-8
 
 # Question 1
 
