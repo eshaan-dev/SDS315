@@ -81,11 +81,15 @@ By bootstrapping the `lm()` function, we can see that the growth rate is roughly
 
 95% bootstrapped confidence interval for growth rate: `[0.159, 0.206]`
 
+95% confidence interval for doubling time using growth rate: `[3.39, 4.4]`
+
 ## Part B
+
 Doing the same for Spain data, we find out that the growth rate is roughly **0.276** and the doubling time is **2.5** days. 
 
 95% bootstrapped confidence interval for growth rate: `[0.234, 0.320]`
 
+95% confidence interval for doubling time using growth rate:`[2.19, 2.99]`
 
 ## Part C
 
