@@ -1,0 +1,168 @@
+---
+title: "Homework 9"
+author: "Eshaan Singh - es45858"
+date: "2025-04-17"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(mosaic)
+library(dplyr)
+library(tibble)
+library(knitr)
+library(moderndive)
+solder = read.csv('solder.csv')
+groceries = read.csv('groceries.csv')
+```
+
+
+Github: https://github.com/eshaan-dev/SDS315/tree/Homework-9
+
+
+
+# Question 1
+
+
+```{r, echo = FALSE}
+
+ggplot(solder) + geom_boxplot(aes(y = skips,x = Opening)) + labs(x = "Opening type", y= "Corresponding number of skips", caption = "Opening type split into categories to find true differences and see an effect on the number of skips")
+#Shows that there is a correlation between the opening size and the number of skips using the mean of each category (PUT AS CAPTION)
+
+ggplot(solder) + geom_boxplot(aes(x = Solder, y = skips)) + labs(x = "Opening type", y= "Corresponding number of skips", caption = "Opening type split into categories to find true differences and see an effect on the number of skips")
+#Shows that there is a correlation between the opening size and the number of skips using the mean of each category (PUT AS CAPTION)
+
+
+```
+
+```{r, echo = FALSE}
+
+lm0 = do(1000)*lm(skips ~ Opening + Solder + Opening:Solder, data = resample(solder))
+name = confint(lm0)$name[1:6]
+estimated_value = confint(lm0)$estimate[1:6]
+
+table <- tibble(name = name, estimated_value = round(estimated_value, 3))
+
+
+kable(table, caption = "Rounded Coefficients")
+```
+## Part C
+
+Gathering a large sample confidence interval, I got that the intercept (which in this case is when the Solder is Thick and the opening is Large) is around 0.39 skips. 
+
+Writing the equation out yields:
+
+$\beta_0 + \beta_1 \cdot \text{OpeningM} + \beta_2 \cdot \text{OpeningS} + \beta_3 \cdot \text{SolderThin} + \beta_4 \cdot \text{OpeningM:SolderThin} + \beta_5 \cdot \text{OpeningS:SolderThin}$
+
+The next is the Opening medium which is paired with (but abstracted) Solder Thick. This value is 2.41 more skips than the baseline which is 2.8 skips.
+
+After that for small opening paired with Solder Thick results in a gain of 5.13 which is 5.52 skips.
+
+Similarly, an opening Large and a solder thin results in an addition of 2.28 and a total of 2.67 skips.
+
+An opening medium and solder thin results in 0.74 less and a total of 4.34 skips.
+
+Finally, an opening small and solder thin results in a gain of 9.65 resulting in 17.45 skips.
+
+
+## Part D
+
+From all of this, it is visable that having a large opening and a thick solder results in the best combination as the number of skips is the smallest. 
+
+
+# Question 2
+
+
+## Part A
+
+```{r, echo = FALSE}
+
+groceries %>% group_by(Store) %>% summarize(avg_price = mean(Price, na.rm = TRUE)) %>% ggplot(aes(x = Store, y = avg_price)) + geom_col(fill = "steelblue") + coord_flip() + labs(title = "Average Price of Products by Store", x = "Store", y = "Average Price", caption = "Average product prices vary across stores, this graph shows which stores are more or less expensive.")
+
+```
+
+
+## Part B
+
+```{r, echo = FALSE, fig.height = 7}
+groceries %>%  group_by(Product) %>% summarize(count = unique(n()), na.rm = TRUE) %>% ggplot(aes(x = count, y= Product)) +  geom_col(fill = "steelblue") + labs(title = "Number of stores that sell a certain product", x = "Store", y = "Product", caption = "Some stores might not sell an item, this figure shows how many stores sell a certain product.")
+```
+
+## Part C
+
+```{r, include = FALSE}
+
+
+results = do(1000)* lm(Price ~ Product + Type, data = resample(groceries))
+
+
+grocery_coefs <- results$TypeGrocery
+
+
+grocery_coefs_clean <- na.omit(grocery_coefs)
+
+
+grocery_mean <- mean(grocery_coefs_clean)
+grocery_se <- sd(grocery_coefs_clean)
+
+
+grocery_lower <- grocery_mean - 1.96 * grocery_se
+grocery_upper <- grocery_mean + 1.96 * grocery_se
+
+
+
+```
+
+Compared with ordinary grocery stores (like Albertsons, HEB, or Krogers), convenience stores charge somewhere between 0.45 and 0.89 dollars more for the same product. 
+
+This was found using the mathematical method of large sample estimate by taking 1.96 * the standard error and adding/subtracting from the mean value.
+
+
+## Part D
+
+```{r, include = FALSE}
+
+res = lm(Price ~ Product + Store, data = (groceries))
+
+summary(res)
+
+```
+
+Based on the summary of the linear model, the two cheapest stores are Walmart and Kroger Fresh Fare. While the most expensive are Whole Foods and Wheatsville Food Co‑Op.
+
+
+## Part E
+
+Looking at the numbers, the estimated difference is `|-0.64596 -  -0.57339|` which is around 0.07 or 7 cents. This is quite the small number compared to other differences between other stores being mostly well over 0.1. This would mean Central Market charges a similar amount to HEB for the same product. 
+
+
+## Part F
+
+```{r, include =FALSE}
+
+groceries = groceries %>% mutate(Income10K = floor(Income/10000))
+
+lm_income = lm(Price ~ Product + Income10K, data = groceries)
+
+get_regression_table(lm_income, conf.level = 0.95, digits=2)
+```
+
+Based on the coefficient (-0.01310), there is slightly more payment for people with less income. This is true because as the equation is set up, an increase in income10k would mean that the price would go lower by 0.01310 per 10k increase. This would mean having a poorer location results in paying more as there is less decrease in price.
+
+A one‑standard‑deviation increase in the income of a ZIP code seems to be associated with a 0.01‑standard‑deviation decrease in the price that consumers in that ZIP code expect to pay for the same product.
+
+
+# Question 3
+
+Part A is **true**. Looking at Figure 1A, we can see a clear upward trend and to verify, we can look at the regression table which shows a statistically significant P value of 0 and the confidence interval being [0.009, 0.018] meaning they dont contain 0. There is a positive correlation of around 0.014 as the slope. 
+
+
+Part B is **false**. Looking at model B, we can see that there is a weak correlation between age and minority as the p-value (1.57) is high and the confidence interval contains 0 [-0.116, 0.912]. Furthermore, looking at model_E, we can see that there is likely no significant impact of age on the policies due to same reasons as before.
+
+
+Part C is **true**. Looking at Figure C1, we can see a clear difference between high and low risk fire groups. The difference being a high fire risk group is more likely to have more FAIR policies as they have in increase in minority percentage.
+
+Part D is **false**. Although income does have an impact on reducing the minority effect, it doesnt account for all impact. Model D2 shows the coefficient on minority is 0.010 with p = 0.002 meaning it is statistically significant. In other words, after adjusting for income, ZIP codes with higher minority percentages still have more FAIR policies. 
+
+Part E is **true**. In model E, the minority coefficient is still positive and statistically significant (0.008 with a p value of  0.006).
