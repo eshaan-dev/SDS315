@@ -28,10 +28,10 @@ Github: https://github.com/eshaan-dev/SDS315/tree/Homework-9
 ```{r, echo = FALSE}
 
 ggplot(solder) + geom_boxplot(aes(y = skips,x = Opening)) + labs(x = "Opening type", y= "Corresponding number of skips", caption = "Opening type split into categories to find true differences and see an effect on the number of skips")
-#Shows that there is a correlation between the opening size and the number of skips using the mean of each category (PUT AS CAPTION)
+
 
 ggplot(solder) + geom_boxplot(aes(x = Solder, y = skips)) + labs(x = "Opening type", y= "Corresponding number of skips", caption = "Opening type split into categories to find true differences and see an effect on the number of skips")
-#Shows that there is a correlation between the opening size and the number of skips using the mean of each category (PUT AS CAPTION)
+
 
 
 ```
@@ -158,11 +158,13 @@ A one‑standard‑deviation increase in the income of a ZIP code seems to be as
 Part A is **true**. Looking at Figure 1A, we can see a clear upward trend and to verify, we can look at the regression table which shows a statistically significant P value of 0 and the confidence interval being [0.009, 0.018] meaning they dont contain 0. There is a positive correlation of around 0.014 as the slope. 
 
 
-Part B is **false**. Looking at model B, we can see that there is a weak correlation between age and minority as the p-value (1.57) is high and the confidence interval contains 0 [-0.116, 0.912]. Furthermore, looking at model_E, we can see that there is likely no significant impact of age on the policies due to same reasons as before.
+Part B is **false**. Looking at model B, we can see that there is a weak correlation between age and minority as the p-value (1.57) is high and the confidence interval contains 0 [-0.116, 0.912]. Furthermore, looking at model_E, we can see that there is likely no significant impact of age on the policies due to same reasons as before. The correction is that this is a collision at best. There is no impact on one of the two variables leading to the idea of a collision and not an interaction based relationship.
 
 
-Part C is **true**. Looking at Figure C1, we can see a clear difference between high and low risk fire groups. The difference being a high fire risk group is more likely to have more FAIR policies as they have in increase in minority percentage.
+Part C is **false**. Looking at Figure C1, we can see minimal difference from 0.009 to 0.01. This is further conflicting with the fact that there is an overlap of 0 with the confidence interval. An observation that is correct is the number of FAIR policies per 100 housing units is greater in high-fire-risk ZIP codes than in low-fire-risk ZIP codes.
 
-Part D is **false**. Although income does have an impact on reducing the minority effect, it doesnt account for all impact. Model D2 shows the coefficient on minority is 0.010 with p = 0.002 meaning it is statistically significant. In other words, after adjusting for income, ZIP codes with higher minority percentages still have more FAIR policies. 
+
+Part D is **false**. Although income does have an impact on reducing the minority effect, it doesnt account for all impact. Model D2 shows the coefficient on minority is 0.010 with p = 0.002 meaning it is statistically significant. In other words, after adjusting for income, ZIP codes with higher minority percentages still have more FAIR policies. Something correct would be that income explains a portion of the correlation between minority percentage and FAIR policy.
+
 
 Part E is **true**. In model E, the minority coefficient is still positive and statistically significant (0.008 with a p value of  0.006).
